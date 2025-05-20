@@ -1,4 +1,3 @@
-# game_engine.py
 import pygame
 from pygame.math import Vector2
 
@@ -58,6 +57,9 @@ class GameEngine:
         # 屏幕边界限制
         player.rect.x = max(0, min(player.rect.x, self.screen.get_width() - player.rect.width))
 
+        player.update_image(controls)
+        player.apply_jump_scale()
+
         return True
 
     def render(self, player):
@@ -72,7 +74,9 @@ class GameEngine:
                           self.screen.get_height() - self.ground_level))
 
         # 绘制玩家
-        pygame.draw.rect(self.screen, self.player_color, player.rect)
+        scaled_image = player.get_scaled_image()
+        image_rect = scaled_image.get_rect(center=player.rect.center)
+        self.screen.blit(scaled_image, image_rect)
 
         # 更新显示
         pygame.display.flip()

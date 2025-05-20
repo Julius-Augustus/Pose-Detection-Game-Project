@@ -5,3 +5,7 @@ class GameConfig:
     GRAVITY = 1
     JUMP_FORCE = -20
     FPS = 30
+class AnimationConfig:
+    IDLE_FRAMES = 4
+    RUN_FRAMES = 6
+    FRAME_DURATION = 100  # 每帧显示时间(ms)

@@ -8,7 +8,7 @@ from config.detection_params import DetectionConfig
 from core.pose_detector import PoseDetector
 from core.gesture_controller import GestureInterpreter
 from core.game_engine import GameEngine
-from entities.GamePlayer import GamePlayer
+from entities.GamePlayer import GamePlayer 
 from utils.visualizer import DetectionVisualizer  # 修改导入路径
 
 def main():

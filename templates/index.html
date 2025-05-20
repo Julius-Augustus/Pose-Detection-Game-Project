@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动作控制游戏</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --accent-color: #FF4081;
+            --dark-color: #121212;
+            --light-color: #f4f4f4;
+            --danger-color: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+            font-weight: 700;
+        }
+
+        .game-description {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .video-feed {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .btn-start {
+            background: linear-gradient(to right, var(--primary-color), #2E7D32);
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: linear-gradient(to right, #2E7D32, var(--primary-color));
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(46, 125, 50, 0.4);
+        }
+
+        .btn-stop {
+            background: linear-gradient(to right, var(--danger-color), #B71C1C);
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: linear-gradient(to right, #B71C1C, var(--danger-color));
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(183, 28, 28, 0.4);
+        }
+
+        .game-status {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 1rem;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-running {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .status-stopped {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .instructions {
+            background-color: rgba(33, 150, 243, 0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 800px;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+
+        .instructions h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .instructions p {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>动作控制游戏</h1>
+            <p class="game-description">通过身体动作控制游戏！使用手势导航并与虚拟环境互动。</p>
+        </header>
+
+        <div class="game-container">
+            <div class="video-container">
+                <img src="{{ url_for('video_feed') }}" class="video-feed" alt="游戏视频画面">
+            </div>
+
+            <div class="controls">
+                <button id="start-btn" class="btn btn-start">开始游戏</button>
+                <button id="stop-btn" class="btn btn-stop">结束游戏</button>
+            </div>
+
+            <div id="game-status" class="game-status status-stopped">游戏就绪</div>
+
+            <div class="instructions">
+                <h3>游戏说明</h3>
+                <p>1. 点击"开始游戏"按钮开始</p>
+                <p>2. 站在摄像头前，确保您的全身可见</p>
+                <p>3. 使用身体动作控制游戏：</p>
+                <p>• 抬起手臂跳跃</p>
+                <p>• 向左/右移动身体以向相应方向移动</p>
+                <p>• 挥手进行特殊动作</p>
+                <p>4. 游戏结束后点击"结束游戏"按钮</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>动作控制游戏 &copy; 2025 | 由计算机视觉技术驱动</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const gameStatus = document.getElementById('game-status');
+
+            // 更新游戏状态的函数
+            function updateGameState(startGame) {
+                fetch('/toggle_game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ start_game: startGame })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (data.is_running) {
+                            gameStatus.textContent = '游戏运行中';
+                            gameStatus.className = 'game-status status-running';
+                        } else {
+                            gameStatus.textContent = '游戏已停止';
+                            gameStatus.className = 'game-status status-stopped';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('错误:', error);
+                    gameStatus.textContent = '错误: 请检查控制台';
+                });
+            }
+
+            // 开始游戏按钮
+            startBtn.addEventListener('click', function() {
+                updateGameState(true);
+            });
+
+            // 停止游戏按钮
+            stopBtn.addEventListener('click', function() {
+                updateGameState(false);
+            });
+        });
+    </script>
+</body>
+</html>

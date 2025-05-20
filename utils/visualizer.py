@@ -1,11 +1,12 @@
-# visualizer.py
+# utils/visualizer.py
 import cv2
 import mediapipe as mp
 
-
 class DetectionVisualizer:
-    # 预定义关键点连接关系（基于MediaPipe Pose定义）
-    POSE_CONNECTIONS = mp.solutions.pose.POSE_CONNECTIONS
+    # 预定义上半身关键点连接关系
+    UPPER_BODY_POSE_CONNECTIONS = frozenset([
+        (0, 11), (0, 12), (11, 13), (13, 15), (12, 14), (14, 16)
+    ])
 
     # 颜色配置
     LANDMARK_COLOR = (0, 255, 0)  # 关键点颜色（BGR）
@@ -27,18 +28,21 @@ class DetectionVisualizer:
             return frame
 
         frame_height, frame_width = frame.shape[:2]
+        # 上半身关键点索引
+        UPPER_BODY_LANDMARKS = [0, 11, 12, 13, 14, 15, 16]
+        upper_body_landmarks = [landmarks[i] for i in UPPER_BODY_LANDMARKS if i < len(landmarks)]
 
         # 绘制连接线
-        for connection in cls.POSE_CONNECTIONS:
+        for connection in cls.UPPER_BODY_POSE_CONNECTIONS:
             start_idx, end_idx = connection
-            start_point = cls._get_pixel_coord(landmarks[start_idx], frame_width, frame_height)
-            end_point = cls._get_pixel_coord(landmarks[end_idx], frame_width, frame_height)
+            start_point = cls._get_pixel_coord(upper_body_landmarks[UPPER_BODY_LANDMARKS.index(start_idx)], frame_width, frame_height)
+            end_point = cls._get_pixel_coord(upper_body_landmarks[UPPER_BODY_LANDMARKS.index(end_idx)], frame_width, frame_height)
 
             if start_point and end_point:
                 cv2.line(frame, start_point, end_point, cls.CONNECTION_COLOR, line_thickness)
 
         # 绘制关键点
-        for idx, landmark in enumerate(landmarks):
+        for idx, landmark in enumerate(upper_body_landmarks):
             center = cls._get_pixel_coord(landmark, frame_width, frame_height)
             if center:
                 # 绘制圆形关键点
@@ -46,7 +50,7 @@ class DetectionVisualizer:
 
                 # 显示索引编号
                 if show_index:
-                    cv2.putText(frame, str(idx),
+                    cv2.putText(frame, str(UPPER_BODY_LANDMARKS[idx]),
                                 (center[0] + 5, center[1] - 5),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                                 cls.TEXT_COLOR, 1)
