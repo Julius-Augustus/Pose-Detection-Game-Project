@@ -4,10 +4,10 @@ import pygame
 class GamePlayer:
     def __init__(self, start_pos, size=40):
         # 加载不同状态的图片
-        self.stand_image = pygame.image.load(r'C:\Users\123\PycharmProjects\Final_exam\OIP-C.jpg')
-        self.move_left_image = pygame.image.load(r'C:\Users\123\PycharmProjects\Final_exam\OIP-C.jpg')
-        self.move_right_image = pygame.image.load(r'C:\Users\123\PycharmProjects\Final_exam\OIP-C.jpg')
-        self.jump_image = pygame.image.load(r'C:\Users\123\PycharmProjects\Final_exam\OIP-C.jpg')
+        self.stand_image = pygame.image.load(r'OIP-C.jpg')
+        self.move_left_image = pygame.image.load(r'OIP-C.jpg')
+        self.move_right_image = pygame.image.load(r'OIP-C.jpg')
+        self.jump_image = pygame.image.load(r'OIP-C.jpg')
 
         self.rect = pygame.Rect(start_pos[0], start_pos[1], size, size)
         self.velocity = pygame.math.Vector2(0, 0)

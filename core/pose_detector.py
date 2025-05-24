@@ -1,7 +1,6 @@
 # pose_detector.py
 import mediapipe as mp
 
-
 class PoseDetector:
     def __init__(self, config):
         self.pose = mp.solutions.pose.Pose(
@@ -10,4 +9,8 @@ class PoseDetector:
         )
 
     def detect(self, frame):
-        return self.pose.process(frame)
+        results = self.pose.process(frame)
+        # 检查结果是否有效
+        if results.pose_landmarks is None:
+            print("No pose landmarks detected.")
+        return results
