@@ -4,9 +4,8 @@ class GestureInterpreter:
         self.screen_size = screen_size
         self.MOVE_SENSITIVITY = 0.2  # 横向移动灵敏度
         self.JUMP_THRESHOLD = 0.3  # 跳跃动作阈值
-        self.HAND_UP_THRESHOLD = 0.2  # 手部上移阈值
-        # 上半身关键点索引
-        self.UPPER_BODY_LANDMARKS = [0, 11, 12, 13, 14, 15, 16]
+        # 全身关键点索引
+        self.ALL_BODY_LANDMARKS = list(range(33))
 
     def interpret(self, landmarks):
         """将人体关键点转换为游戏控制指令"""
@@ -16,42 +15,24 @@ class GestureInterpreter:
             return {
                 'move_left': False,
                 'move_right': False,
-                'jump': False,
-                'hands_up': False
+                'jump': False
             }
-        # 筛选上半身关键点
-        upper_body_landmarks = [landmarks[i] for i in self.UPPER_BODY_LANDMARKS if i < len(landmarks)]
+        # 筛选全身关键点
+        all_body_landmarks = [landmarks[i] for i in self.ALL_BODY_LANDMARKS if i < len(landmarks)]
         return {
-            'move_left': self._detect_left_arm(upper_body_landmarks),
-            'move_right': self._detect_right_arm(upper_body_landmarks),
-            'jump': self._detect_jump(upper_body_landmarks),
-            'hands_up': self._detect_hands_up(upper_body_landmarks)
+            'move_left': self._detect_left_arm(all_body_landmarks),
+            'move_right': self._detect_right_arm(all_body_landmarks),
+            'jump': self._detect_jump(all_body_landmarks)
         }
 
-    def _detect_hands_up(self, landmarks):
-        """检测双手是否上移"""
-        if not landmarks:
-            return False
-
-        # 左腕(15) 和 右腕(16) 的垂直位置比较
-        left_wrist = self._get_landmark_y(landmarks, self.UPPER_BODY_LANDMARKS.index(15))
-        right_wrist = self._get_landmark_y(landmarks, self.UPPER_BODY_LANDMARKS.index(16))
-        left_shoulder = self._get_landmark_y(landmarks, self.UPPER_BODY_LANDMARKS.index(11))
-        right_shoulder = self._get_landmark_y(landmarks, self.UPPER_BODY_LANDMARKS.index(12))
-
-        if left_wrist is not None and right_wrist is not None and left_shoulder is not None and right_shoulder is not None:
-            return (left_shoulder - left_wrist) > self.HAND_UP_THRESHOLD and (right_shoulder - right_wrist) > self.HAND_UP_THRESHOLD
-        return False
-
-    # 原有方法保持不变
     def _detect_left_arm(self, landmarks):
         """检测左臂水平移动（关键点索引根据mediapipe定义）"""
         if not landmarks:
             return False
 
         # 左肩(11) 和 左腕(15) 的横向位置比较
-        left_shoulder = self._get_landmark_x(landmarks, self.UPPER_BODY_LANDMARKS.index(11))
-        left_wrist = self._get_landmark_x(landmarks, self.UPPER_BODY_LANDMARKS.index(15))
+        left_shoulder = self._get_landmark_x(landmarks, self.ALL_BODY_LANDMARKS.index(11))
+        left_wrist = self._get_landmark_x(landmarks, self.ALL_BODY_LANDMARKS.index(15))
         if left_shoulder is not None and left_wrist is not None:
             return (left_wrist - left_shoulder) < -self.MOVE_SENSITIVITY
         return False
@@ -62,8 +43,8 @@ class GestureInterpreter:
             return False
 
         # 右肩(12) 和 右腕(16) 的横向位置比较
-        right_shoulder = self._get_landmark_x(landmarks, self.UPPER_BODY_LANDMARKS.index(12))
-        right_wrist = self._get_landmark_x(landmarks, self.UPPER_BODY_LANDMARKS.index(16))
+        right_shoulder = self._get_landmark_x(landmarks, self.ALL_BODY_LANDMARKS.index(12))
+        right_wrist = self._get_landmark_x(landmarks, self.ALL_BODY_LANDMARKS.index(16))
         if right_shoulder is not None and right_wrist is not None:
             return (right_wrist - right_shoulder) > self.MOVE_SENSITIVITY
         return False
@@ -74,11 +55,11 @@ class GestureInterpreter:
             return False
 
         # 鼻子(0) 的垂直位置变化
-        nose = self._get_landmark_y(landmarks, self.UPPER_BODY_LANDMARKS.index(0))
-        # 由于只检测上半身，这里可以使用其他上半身关键点代替左髋部
-        left_shoulder = self._get_landmark_y(landmarks, self.UPPER_BODY_LANDMARKS.index(11))
-        if nose is not None and left_shoulder is not None:
-            return (left_shoulder - nose) > self.JUMP_THRESHOLD
+        nose = self._get_landmark_y(landmarks, self.ALL_BODY_LANDMARKS.index(0))
+        # 由于检测全身，这里可以使用左髋部(23) 代替上半身关键点
+        left_hip = self._get_landmark_y(landmarks, self.ALL_BODY_LANDMARKS.index(23))
+        if nose is not None and left_hip is not None:
+            return (left_hip - nose) > self.JUMP_THRESHOLD
         return False
 
     # 新增安全访问方法
